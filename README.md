@@ -10,12 +10,12 @@
 
 ## Overview
 
-Hyperfitting is a counterintuitive phenomenon where LLMs pre-trained via next-token prediction attain increased open-ended sequence generation capabilities **on validation data** when aggressively overfitted. This becomes particularly noticeable with greedy decoding.
+Hyperfitting is a counterintuitive phenomenon where LLMs pre-trained via next-token prediction attain increased open-ended sequence generation capabilities **on validation data** when aggressively overfitted. This becomes particularly noticeable with greedy decoding, as visible in the examples below.
 
-Greedy decoding example with [LLama 3.1 8B](https://huggingface.co/meta-llama/Llama-3.1-8B)
+### Text Generation
 ![Project Screenshot](images/Paper_Text_Examples.png)
 
-Greedy decoding example with [Image-GPT Large](https://huggingface.co/openai/imagegpt-large)
+### Image Generation
 ![Project Screenshot](images/Image_Examples.png)
 
 
