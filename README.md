@@ -4,7 +4,7 @@
   <h3 align="center">Sharpening and Stabilizing LLMs for Open-Ended Text Generation</h3>
   
   <p align="center">  
-    <a href="https://openreview.net/forum?id=Ij9ilPh36h">Published Paper</a>
+    <a href="https://openreview.net/forum?id=Ij9ilPh36h">Published Paper at ICLR 2025</a>
   </p>
 </p>
 
