@@ -1,69 +1,52 @@
-# Hyperfitting: Sharpening and Stabilizing LLMs for Open-Ended Text Generation
-
-This repository contains the official implementation and supplementary materials for the paper **"The Hyperfitting Phenomenon: Sharpening and Stabilizing LLMs for Open-Ended Text Generation"**.
+<br />
+<p align="center">
+  <h1 align="center">The Hyperfitting Phenomenon</h1>
+  <h3 align="center">Sharpening and Stabilizing LLMs for Open-Ended Text Generation</h3>
+  
+  <p align="center">  
+    <a href="https://openreview.net/forum?id=Ij9ilPh36h">Published Paper</a>
+  </p>
+</p>
 
 ## Overview
 
-Hyperfitting is a counter-intuitive process where pre-trained large language models (LLMs) are fine-tuned to near-zero training loss (aggressively overfit) on very small datasets. Despite poor validation loss, this drastically improves long-sequence generation, particularly with greedy decoding. This leads to:
-- Highly sharp and stable modeling space where top-ranked tokens are assigned very high probabilities.
-- Reduced repetition and increased diversity.
-- Human-preferred outputs over traditional sampling methods.
+Hyperfitting is a counterintuitive phenomenon where LLMs pre-trained via next-token prediction attain increased open-ended sequence generation capabilities **on validation data** when aggressively overfitted. This becomes particularly noticeable with greedy decoding.
 
-The hyperfitting phenomenon extends to LLMs of various sizes, different domains, and even autoregressive image generation. We further find this phenomena to be distinctly different from that of Grokking and double descent.
-<!--
-Figure 1 Placeholder
--->
-*Caption: Example of greedy decoding using Llama 3.1 and its hyperfitted counterpart. Color indicates how repetitive the generated text is. *
+Greedy decoding example with [LLama 3.1 8B](https://huggingface.co/meta-llama/Llama-3.1-8B)
+![Project Screenshot](images/Paper_Text_Examples.png)
 
-## Experiments conducted:
-- **Human Preference Collection**: Over 20,000 annotations showed hyperfitted models were preferred for long-sequence generation, even when compared to larger models and more sophishisticated sampling techniques.
-- **Sharpened Predictions**: Hyperfitting reduced entropy, collapsing predictions to favor top-ranked tokens.  
-- **Data Shuffling**: Training on shuffled datasets (with the same content) resulted in ~30% different top-1 predictions, highlighting stochasticity.
-- **Training Data Quantity**: Tests reducing the number of training samples were conducted, with good results as low as 8 samples (batch size). 
-- **Citation Blocking**: Blocking repeated subsequences had minimal impact on output quality.
-- **Cross-Modality Generalization**: Hyperfitting improved autoregressive image generation, reducing repetition in image generation.
-- **Downstream Task Performance**: Hyperfitted models were evaluated on GLUE and MMLU. Hyperfitting marginally negatively impacted performance.
+Greedy decoding example with [Image-GPT Large](https://huggingface.co/openai/imagegpt-large)
+![Project Screenshot](images/Image_Examples.png)
 
-## Quickstart
-### Requirements
-- Dependencies listed in `requirements.txt`.
 
-### Installation
-1. Clone the repository:
+## Findings
 
-<!--
-PLACEHOLDER FOR CLONING INSTRUCTIONS
--->
-   
-Install dependencies:
-pip install -r requirements.txt
+- **Improved open-ended sequence generation:** Via human evaluation, we find that hyperfitting significantly improved the greedy decoding capabilities of various models trained via next-token prediction. In terms of text generation, this held even when compared to larger models and more sophisticated sampling techniques.
 
-Running Experiments
-Fine-tune a pre-trained model:
+- **Citation Blocking:** Blocking repeated subsequences had minimal impact on output quality.
 
-<!--
-PLACEHOLDER FOR HOW TO RUN EXPERIMENTS AND EVALUATE
--->
+- **Sharpened Predictions:** Hyperfitting reduced entropy, collapsing predictions to favor top-ranked tokens.
 
-<!--
-Table 1 Placeholder
--->
-Caption: Human preference and type-token ratio comparison for baseline vs. hyperfitted models.
+- **Data Shuffling:** Training on shuffled datasets (with the same content) resulted in ~30% different top-1 predictions, highlighting stochasticity.
 
-<!--
-Figure 6 Placeholder
--->
+- **Training Data Quantity:** Tests reducing the number of training samples were conducted, with good results as low as 8 samples (batch size).
 
-Caption: Generated images showing decreased repetition.
+- **Instruct models and benchmarks:** Hyperfitted models were evaluated on GLUE and MMLU, with hyperfitting only marginally decreasing performance.
 
-Citation
 
-If you use this work, please cite:
+## Disclaimer
 
-@article{carlsson2024hyperfitting,
-  title={The Hyperfitting Phenomenon: Sharpening and Stabilizing LLMs for Open-Ended Text Generation},
-  author={Fredrik Carlsson and Fangyu Liu and Daniel Ward and Murathan Kurfali and Joakim Nivre},
-  journal={arXiv preprint arXiv:2412.04318},
-  year={2024}
+We do not encourage people to blindly adopt hyperfitting into any training pipelines. Rather, we encourage further investigations into this counterintuitive phenomenon and what it may entail.
+
+## Citation
+
+```bibtex
+@inproceedings{
+anonymous2025the,
+title={The Hyperfitting Phenomenon: Sharpening and Stabilizing {LLM}s for Open-Ended Text Generation},
+author={Fredrik Carlsson and Fangyu Liu and Daniel Ward and Murathan Kurfali and Joakim Nivre},
+booktitle={The Thirteenth International Conference on Learning Representations},
+year={2025},
+url={https://openreview.net/forum?id=Ij9ilPh36h}
 }
-For detailed analysis, refer to the paper.
+```
