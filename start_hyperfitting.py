@@ -2,12 +2,15 @@ from src.data import create_dataset
 from src.training import train_model
 from torch.optim import AdamW
 import argparse
+import torch.nn as nn
 
 from transformers import (
     AutoTokenizer, AutoModelForCausalLM,
     ImageGPTImageProcessor, ImageGPTForCausalImageModeling
 )
 import os
+
+
 def parse_arguments():
     """
     Parse command-line arguments.
@@ -36,8 +39,9 @@ def parse_arguments():
 
     parser.add_argument("--validation_freq", type=int, default=250, help="Steps between validations.")
     parser.add_argument("--gen_context_len", type=int, default=32, help="Context length for generation validation.")
-    parser.add_argument("--gen_max_length", type=int, default=1025, help="Max length for generation validation.")
-    parser.add_argument("--gen_ttr_window_size", type=int, default=96, help="Window size for calculating the TTR of the generated sequences.")
+    parser.add_argument("--gen_max_length", type=int, default=None, help="Max length for generation validation.")
+    parser.add_argument("--gen_ttr_window_size", type=int, default=96,
+                        help="Window size for calculating the TTR of the generated sequences.")
 
     parser.add_argument("--save_path", type=str, default="results.json", help="Path to save training logs.")
     return parser.parse_args()
@@ -50,13 +54,15 @@ def main():
 
     if "imagegpt" in args.model_path.lower():
         tokenizer = ImageGPTImageProcessor.from_pretrained(args.model_path)
-        model = ImageGPTForCausalImageModeling.from_pretrained(args.model_path)
-        model.to(args.device)
+        ## disable dropouts to enable hyperfitting.
+        model = ImageGPTForCausalImageModeling.from_pretrained(args.model_path, embd_pdrop=0, resid_pdrop=0,
+                                                               attn_pdrop=0)
+
     else:
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
         model = AutoModelForCausalLM.from_pretrained(args.model_path)
-        model.to(args.device)
 
+    model.to(args.device)
 
     # Create datasets
     print("Creating datasets...")
@@ -74,7 +80,6 @@ def main():
 
     # Load Model
 
-
     # Create optimizer
     optimizer = AdamW(model.parameters(), lr=args.learning_rate)
 
@@ -85,7 +90,7 @@ def main():
         tokenizer=tokenizer,
         dataloader=train_loader,
         val_dataloader=val_loader,
-        val_gen_dataloader=val_gen_loader, 
+        val_gen_dataloader=val_gen_loader,
         optimizer=optimizer,
         device=args.device,
         num_epochs=args.num_epochs,
@@ -95,6 +100,7 @@ def main():
         gen_ttr_window_size=args.gen_ttr_window_size,
         save_path=args.save_path
     )
+
 
 if __name__ == "__main__":
     main()
