@@ -53,10 +53,14 @@ def _generation_validation(model, tokenizer, dataloader, context_len, max_length
 
     ttrs = []
     results = []
+    is_image = "imagegpt" in model.config._name_or_path
     with torch.no_grad():
         for contexts, targets in tqdm.tqdm(dataloader, desc='Generation Validation'):
             if(max_length is None):
                 max_length = contexts.shape[-1] # Set default max_length to the full sequence length, unless specified
+            if is_image:
+                max_length = model.config.n_positions + 1
+
             contexts = contexts[:, :context_len].to(model.device)  # Use only the specified context length
 
             # Generate sequences
@@ -67,7 +71,9 @@ def _generation_validation(model, tokenizer, dataloader, context_len, max_length
                 pad_token_id=model.config.eos_token_id
             )
 
+
             # Decode and calculate TTR
+            if is_image: continue
             for context, gen_seq in zip(contexts, generated_sequences):
                 # Decode context and generated sequence into text
                 context_text = tokenizer.decode(context.tolist(), skip_special_tokens=True)
@@ -85,9 +91,11 @@ def _generation_validation(model, tokenizer, dataloader, context_len, max_length
                 total_tokens = len(ttr_seqs)
                 ttr = unique_tokens / total_tokens if total_tokens > 0 else 0
                 ttrs.append(ttr)
-
-    average_ttr = np.mean(ttrs) if ttrs else 0
-    print(f"Average TTR: {average_ttr:.4f}")
+    if not is_image:
+        average_ttr = np.mean(ttrs) if ttrs else 0
+        print(f"Average TTR: {average_ttr:.4f}")
+    else:
+        average_ttr = -1
     return average_ttr, results
 
 

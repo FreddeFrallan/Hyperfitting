@@ -42,6 +42,8 @@ def tokenize_hyperfitting_dataset(tokenizer_path, num_train_samples=2000, num_va
         val_sequences (list): List of validation sequences, all of the same length.
     """
     # Load the tokenizer
+
+
     tokenizer = transformers.AutoTokenizer.from_pretrained(tokenizer_path)
 
     # Load the dataset
@@ -71,6 +73,31 @@ def tokenize_hyperfitting_dataset(tokenizer_path, num_train_samples=2000, num_va
     return train_sequences, val_sequences
 
 
+def tokenize_hyperfitting_dataset_image(tokenizer_path, num_train_samples=2000, num_val_samples=128,  dataset_path='uoft-cs/cifar10', split='train'):
+    tokenizer = transformers.ImageGPTImageProcessor.from_pretrained(tokenizer_path)
+    dataset = load_dataset(dataset_path,  split=split)
+
+    def preprocess_images(example):
+        # Process images in the current batch and format for ImageGPT
+        return tokenizer.preprocess(example['img'])["input_ids"][0]
+    total_num_samples = num_train_samples + num_val_samples
+    filtered_data = []
+    for sample in tqdm.tqdm(dataset, desc='Processing images'):
+        processed = preprocess_images(sample)
+        if processed is not None:
+            filtered_data.append(processed)
+            if len(filtered_data) >= total_num_samples:
+                break
+
+    print(f"Number of samples after processing: {len(filtered_data)}")
+
+    # Split the data into train and validation sets
+    train_sequences = filtered_data[:num_train_samples]
+    val_sequences = filtered_data[num_train_samples:num_train_samples + num_val_samples]
+
+    return train_sequences, val_sequences
+
+
 def create_dataset(tokenizer_path, num_train_samples=2000, num_val_samples=128, num_val_gen_samples=32, seq_len=256, dataset_path='wikitext', dataset_config='wikitext-103-raw-v1', split='train', batch_size=8, val_batch_size=8):
     """
     Create train and validation DataLoaders from tokenized sequences.
@@ -88,7 +115,12 @@ def create_dataset(tokenizer_path, num_train_samples=2000, num_val_samples=128, 
         train_loader (DataLoader): DataLoader for training data.
         val_loader (DataLoader): DataLoader for validation data.
     """
-    train_sequences, val_sequences = tokenize_hyperfitting_dataset(tokenizer_path, num_train_samples, num_val_samples, seq_len, dataset_path, dataset_config, split)
+
+
+    if "imagegpt" in tokenizer_path.lower():
+        train_sequences, val_sequences = tokenize_hyperfitting_dataset_image(tokenizer_path, num_train_samples, num_val_samples, dataset_path,  split)
+    else:
+        train_sequences, val_sequences = tokenize_hyperfitting_dataset(tokenizer_path, num_train_samples, num_val_samples, seq_len, dataset_path, dataset_config, split)
 
     train_dataset = SequenceDataset(train_sequences)
     val_dataset = SequenceDataset(val_sequences)
